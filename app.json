@@ -4,10 +4,10 @@
     "slug": "so-i-have-an-app-in",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/app-icon-ofe.png",
+    "icon": "./assets/images/Sk\u00e4rmbild 2026-03-23 221630.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/app-icon-ofe.png",
+      "image": "./assets/images/Sk\u00e4rmbild 2026-03-23 221630.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/app-icon-ofe.png",
+        "foregroundImage": "./assets/images/Sk\u00e4rmbild 2026-03-23 221630.png",
         "backgroundColor": "#000000"
       },
       "package": "com.placeholder.app"
