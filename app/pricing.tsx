@@ -9,32 +9,14 @@ import {
   UIManager,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DS } from '@/constants/Colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const COLORS = {
-  background: '#0A0E1A',
-  surface: '#111827',
-  surfaceSecondary: '#1C2333',
-  text: '#F0F4FF',
-  textSecondary: '#8B9CC8',
-  textTertiary: '#4A5578',
-  primary: '#4F8EF7',
-  primaryMuted: 'rgba(79,142,247,0.12)',
-  accent: '#34D399',
-  accentMuted: 'rgba(52,211,153,0.12)',
-  warning: '#FBBF24',
-  warningMuted: 'rgba(251,191,36,0.12)',
-  danger: '#F87171',
-  dangerMuted: 'rgba(248,113,113,0.12)',
-  border: 'rgba(79,142,247,0.12)',
-  divider: 'rgba(240,244,255,0.06)',
-};
 
 const FREE_FEATURES = [
   '3 scans per month',
@@ -80,7 +62,9 @@ const FAQ_ITEMS = [
 function FeatureRow({ text }: { text: string }) {
   return (
     <View style={styles.featureRow}>
-      <CheckCircle size={15} color={COLORS.accent} />
+      <View style={styles.featureCheck}>
+        <Text style={styles.featureCheckText}>✓</Text>
+      </View>
       <Text style={styles.featureText}>{text}</Text>
     </View>
   );
@@ -95,15 +79,13 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
     setOpen((v) => !v);
   }, [question]);
 
+  const chevron = open ? '↑' : '↓';
+
   return (
     <View style={styles.faqItem}>
       <AnimatedPressable onPress={toggle} style={styles.faqQuestion}>
         <Text style={styles.faqQuestionText}>{question}</Text>
-        {open ? (
-          <ChevronUp size={18} color={COLORS.textSecondary} />
-        ) : (
-          <ChevronDown size={18} color={COLORS.textSecondary} />
-        )}
+        <Text style={styles.faqChevron}>{chevron}</Text>
       </AnimatedPressable>
       {open && <Text style={styles.faqAnswer}>{answer}</Text>}
     </View>
@@ -141,14 +123,14 @@ export default function PricingScreen() {
       {/* Header */}
       <View style={styles.header}>
         <AnimatedPressable onPress={handleBack} style={styles.headerBack}>
-          <ChevronLeft size={24} color={COLORS.textSecondary} />
+          <Text style={styles.headerBackIcon}>←</Text>
         </AnimatedPressable>
         <Text style={styles.headerTitle}>Pricing</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero */}
@@ -159,8 +141,10 @@ export default function PricingScreen() {
 
         {/* Free Tier */}
         <View style={styles.card}>
-          <View style={[styles.tierBadge, { backgroundColor: COLORS.primaryMuted }]}>
-            <Text style={[styles.tierBadgeText, { color: COLORS.primary }]}>Start here</Text>
+          <View style={styles.tierHeader}>
+            <View style={[styles.tierBadge, { backgroundColor: DS.surfaceContainerHigh }]}>
+              <Text style={[styles.tierBadgeText, { color: DS.onSurfaceVariant }]}>Start here</Text>
+            </View>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceAmount}>$0</Text>
@@ -179,11 +163,13 @@ export default function PricingScreen() {
 
         {/* Pro Tier — Featured */}
         <View style={[styles.card, styles.proCard]}>
-          <View style={[styles.tierBadge, { backgroundColor: COLORS.primary }]}>
-            <Text style={[styles.tierBadgeText, { color: '#FFFFFF' }]}>Most popular</Text>
+          <View style={styles.tierHeader}>
+            <View style={[styles.tierBadge, { backgroundColor: DS.primaryFixed }]}>
+              <Text style={[styles.tierBadgeText, { color: DS.primary }]}>Most popular</Text>
+            </View>
           </View>
           <View style={styles.priceRow}>
-            <Text style={styles.priceAmount}>$29</Text>
+            <Text style={[styles.priceAmount, { color: DS.primary }]}>$29</Text>
             <Text style={styles.pricePeriod}>/month</Text>
           </View>
           <Text style={styles.tierName}>Pro</Text>
@@ -192,15 +178,24 @@ export default function PricingScreen() {
               <FeatureRow key={f} text={f} />
             ))}
           </View>
-          <AnimatedPressable onPress={handleStartPro} style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Start Pro trial</Text>
+          <AnimatedPressable onPress={handleStartPro}>
+            <LinearGradient
+              colors={[DS.gradientStart, DS.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.primaryButton}
+            >
+              <Text style={styles.primaryButtonText}>Start Pro trial</Text>
+            </LinearGradient>
           </AnimatedPressable>
         </View>
 
         {/* Agency Tier */}
         <View style={styles.card}>
-          <View style={[styles.tierBadge, { backgroundColor: COLORS.warningMuted }]}>
-            <Text style={[styles.tierBadgeText, { color: COLORS.warning }]}>For teams</Text>
+          <View style={styles.tierHeader}>
+            <View style={[styles.tierBadge, { backgroundColor: '#FEF3C7' }]}>
+              <Text style={[styles.tierBadgeText, { color: DS.warning }]}>For teams</Text>
+            </View>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceAmount}>$99</Text>
@@ -224,7 +219,7 @@ export default function PricingScreen() {
 
         {/* FAQ */}
         <View style={styles.faqSection}>
-          <Text style={styles.faqTitle}>Frequently Asked Questions</Text>
+          <Text style={styles.faqSectionLabel}>FREQUENTLY ASKED QUESTIONS</Text>
           <View style={styles.faqList}>
             {FAQ_ITEMS.map((item, i) => (
               <View key={item.id}>
@@ -242,64 +237,81 @@ export default function PricingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: DS.background,
   },
   header: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: DS.surfaceContainerLowest,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: DS.outlineVariant + '33',
   },
   headerBack: {
-    padding: 4,
     width: 44,
+    height: 44,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  headerBackIcon: {
+    fontSize: 22,
+    color: DS.primary,
+    fontWeight: '600',
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: COLORS.text,
+    color: DS.onSurface,
     letterSpacing: -0.3,
   },
   headerSpacer: {
     width: 44,
   },
   scrollContent: {
-    padding: 20,
+    padding: 16,
     gap: 16,
   },
   hero: {
     alignItems: 'center',
     gap: 8,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   heroTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: COLORS.text,
+    color: DS.onSurface,
     textAlign: 'center',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
     lineHeight: 34,
   },
   heroSubtitle: {
     fontSize: 15,
-    color: COLORS.textSecondary,
+    color: DS.onSurfaceVariant,
     textAlign: 'center',
     lineHeight: 22,
   },
   card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    backgroundColor: DS.surfaceContainerLowest,
+    borderRadius: 12,
     padding: 20,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: DS.outlineVariant + '33',
     gap: 14,
+    shadowColor: DS.onSurface,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 1,
   },
   proCard: {
-    borderColor: COLORS.primary,
+    borderColor: DS.primary + '66',
     borderWidth: 2,
+  },
+  tierHeader: {
+    flexDirection: 'row',
   },
   tierBadge: {
     borderRadius: 20,
@@ -308,8 +320,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   tierBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   priceRow: {
@@ -318,21 +330,24 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   priceAmount: {
-    fontSize: 42,
+    fontSize: 44,
     fontWeight: '700',
-    color: COLORS.text,
-    lineHeight: 48,
+    color: DS.onSurface,
+    lineHeight: 50,
+    letterSpacing: -1,
   },
   pricePeriod: {
     fontSize: 15,
-    color: COLORS.textSecondary,
-    marginBottom: 6,
+    color: DS.outline,
+    marginBottom: 8,
+    fontWeight: '500',
   },
   tierName: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
-    color: COLORS.textSecondary,
+    color: DS.onSurfaceVariant,
     marginTop: -8,
+    letterSpacing: 0.2,
   },
   featuresList: {
     gap: 10,
@@ -342,37 +357,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  featureCheck: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: DS.secondaryContainer + '60',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureCheckText: {
+    fontSize: 10,
+    color: DS.secondary,
+    fontWeight: '800',
+  },
   featureText: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: DS.onSurfaceVariant,
     flex: 1,
+    lineHeight: 20,
   },
   primaryButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    height: 50,
+    borderRadius: 10,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 4,
+    shadowColor: DS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
+    color: DS.onPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   outlineButton: {
-    borderRadius: 12,
-    height: 50,
+    borderRadius: 10,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderColor: DS.outlineVariant,
     marginTop: 4,
   },
   outlineButtonText: {
-    color: COLORS.primary,
-    fontSize: 15,
+    color: DS.onSurface,
+    fontSize: 14,
     fontWeight: '600',
+    letterSpacing: 0.3,
   },
   enterpriseLink: {
     paddingVertical: 8,
@@ -380,24 +416,27 @@ const styles = StyleSheet.create({
   },
   enterpriseLinkText: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: DS.primary,
     textAlign: 'center',
+    fontWeight: '500',
   },
   faqSection: {
     gap: 12,
     marginTop: 8,
   },
-  faqTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.text,
-    letterSpacing: -0.2,
+  faqSectionLabel: {
+    fontSize: 10,
+    color: DS.outline,
+    fontWeight: '600',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    paddingHorizontal: 4,
   },
   faqList: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    backgroundColor: DS.surfaceContainerLowest,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: DS.outlineVariant + '33',
     overflow: 'hidden',
   },
   faqItem: {
@@ -414,18 +453,23 @@ const styles = StyleSheet.create({
   faqQuestionText: {
     fontSize: 15,
     fontWeight: '500',
-    color: COLORS.text,
+    color: DS.onSurface,
     flex: 1,
+  },
+  faqChevron: {
+    fontSize: 14,
+    color: DS.outline,
+    fontWeight: '600',
   },
   faqAnswer: {
     fontSize: 14,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
+    color: DS.onSurfaceVariant,
+    lineHeight: 21,
     paddingBottom: 14,
   },
   faqDivider: {
     height: 1,
-    backgroundColor: COLORS.divider,
+    backgroundColor: DS.outlineVariant + '33',
     marginHorizontal: 16,
   },
 });

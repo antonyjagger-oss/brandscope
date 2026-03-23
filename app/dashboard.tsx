@@ -8,38 +8,16 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  ChevronLeft,
-  TrendingUp,
-  AlertTriangle,
-} from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { mockResults } from '@/constants/mockData';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const COLORS = {
-  background: '#0A0E1A',
-  surface: '#111827',
-  surfaceSecondary: '#1C2333',
-  text: '#F0F4FF',
-  textSecondary: '#8B9CC8',
-  textTertiary: '#4A5578',
-  primary: '#4F8EF7',
-  primaryMuted: 'rgba(79,142,247,0.12)',
-  accent: '#34D399',
-  accentMuted: 'rgba(52,211,153,0.12)',
-  warning: '#FBBF24',
-  warningMuted: 'rgba(251,191,36,0.12)',
-  danger: '#F87171',
-  dangerMuted: 'rgba(248,113,113,0.12)',
-  border: 'rgba(79,142,247,0.12)',
-  divider: 'rgba(240,244,255,0.06)',
-};
+import { DS } from '@/constants/Colors';
 
 function getScoreColor(score: number) {
-  if (score >= 80) return COLORS.accent;
-  if (score >= 50) return COLORS.warning;
-  return COLORS.danger;
+  if (score >= 80) return DS.scoreGreen;
+  if (score >= 50) return DS.warning;
+  return DS.critical;
 }
 
 function StaggeredItem({
@@ -57,13 +35,13 @@ function StaggeredItem({
       Animated.timing(opacity, {
         toValue: 1,
         duration: 350,
-        delay: index * 60,
+        delay: index * 70,
         useNativeDriver: true,
       }),
       Animated.timing(translateY, {
         toValue: 0,
         duration: 350,
-        delay: index * 60,
+        delay: index * 70,
         useNativeDriver: true,
       }),
     ]).start();
@@ -104,141 +82,157 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* Custom Header */}
+      {/* Header */}
       <View style={styles.header}>
         <AnimatedPressable onPress={handleBack} style={styles.headerBack}>
-          <ChevronLeft size={24} color={COLORS.textSecondary} />
+          <Text style={styles.headerBackIcon}>←</Text>
         </AnimatedPressable>
-        <Text style={styles.headerTitle}>BrandScope</Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerBrandText}>BrandScope</Text>
+        </View>
         <Text style={styles.headerRight}>Results</Text>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Score Card */}
         <StaggeredItem index={0}>
-          <View style={styles.card}>
+          <View style={styles.scoreCard}>
             <Text style={styles.sectionLabel}>AI VISIBILITY SCORE</Text>
             <View style={styles.scoreRow}>
               <Text style={[styles.scoreNumber, { color: scoreColor }]}>{scoreText}</Text>
               <Text style={styles.scoreOutOf}>/100</Text>
             </View>
             <View style={styles.changeBadge}>
-              <TrendingUp size={14} color={COLORS.accent} />
+              <Text style={styles.changeBadgeArrow}>↑</Text>
               <Text style={styles.changeBadgeText}>{mockResults.scoreChange}</Text>
             </View>
           </View>
         </StaggeredItem>
 
-        {/* Engine Breakdown */}
+        {/* Engine Breakdown label */}
+        <StaggeredItem index={1}>
+          <Text style={styles.groupLabel}>ENGINE BREAKDOWN</Text>
+        </StaggeredItem>
+
+        {/* Engine Cards */}
         {mockResults.engines.map((engine, i) => {
-          const borderColor = engine.sentimentWarning ? COLORS.warningMuted : COLORS.accentMuted;
-          const sentimentBg = engine.sentimentWarning ? COLORS.warningMuted : COLORS.accentMuted;
-          const sentimentColor = engine.sentimentWarning ? COLORS.warning : COLORS.accent;
+          const isWarning = engine.sentimentWarning;
+          const sentimentBg = isWarning ? '#FEF3C7' : DS.secondaryContainer + '40';
+          const sentimentColor = isWarning ? DS.warning : DS.onSecondaryContainer;
           const engineScoreColor = getScoreColor(engine.score);
           const engineScoreText = String(engine.score);
+          const leftBorderColor = isWarning ? DS.warning : DS.secondary;
 
           return (
-            <StaggeredItem key={engine.name} index={i + 1}>
-              <View style={[styles.card, { borderColor }]}>
+            <StaggeredItem key={engine.name} index={i + 2}>
+              <View style={[styles.engineCard, { borderLeftColor: leftBorderColor }]}>
                 <View style={styles.engineHeader}>
-                  <Text style={styles.engineName}>{engine.name}</Text>
-                  <Text style={[styles.engineScore, { color: engineScoreColor }]}>
-                    {engineScoreText}
-                  </Text>
+                  <View style={styles.engineIconBox}>
+                    <Text style={styles.engineIconText}>
+                      {engine.name === 'Perplexity' ? '⚡' : engine.name === 'ChatGPT' ? '💬' : '🔍'}
+                    </Text>
+                  </View>
+                  <View style={styles.engineInfo}>
+                    <Text style={styles.engineName}>{engine.name}</Text>
+                    <Text style={styles.engineSnippet} numberOfLines={2}>
+                      {engine.snippet}
+                    </Text>
+                    <View style={[styles.sentimentBadge, { backgroundColor: sentimentBg }]}>
+                      <Text style={[styles.sentimentText, { color: sentimentColor }]}>
+                        {engine.sentiment}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.engineScoreCol}>
+                    <Text style={[styles.engineScore, { color: engineScoreColor }]}>
+                      {engineScoreText}
+                    </Text>
+                    <Text style={styles.engineScoreLabel}>SCORE</Text>
+                  </View>
                 </View>
-                <View style={[styles.sentimentBadge, { backgroundColor: sentimentBg }]}>
-                  <Text style={[styles.sentimentText, { color: sentimentColor }]}>
-                    {engine.sentiment}
-                  </Text>
-                </View>
-                <Text style={styles.snippet} numberOfLines={3}>
-                  {engine.snippet}
-                </Text>
               </View>
             </StaggeredItem>
           );
         })}
 
-        {/* Sentiment Mix */}
-        <StaggeredItem index={4}>
-          <View style={styles.card}>
-            <Text style={styles.sectionLabel}>SENTIMENT MIX</Text>
-            <View style={styles.sentimentBar}>
-              <View
-                style={[
-                  styles.sentimentSegment,
-                  {
-                    flex: mockResults.sentimentMix.positive,
-                    backgroundColor: COLORS.accent,
-                    borderTopLeftRadius: 4,
-                    borderBottomLeftRadius: 4,
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.sentimentSegment,
-                  {
-                    flex: mockResults.sentimentMix.neutral,
-                    backgroundColor: COLORS.warning,
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.sentimentSegment,
-                  {
-                    flex: mockResults.sentimentMix.negative,
-                    backgroundColor: COLORS.danger,
-                    borderTopRightRadius: 4,
-                    borderBottomRightRadius: 4,
-                  },
-                ]}
-              />
-            </View>
-            <View style={styles.sentimentLegend}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: COLORS.accent }]} />
-                <Text style={styles.legendText}>
-                  {mockResults.sentimentMix.positive}% Positive
-                </Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: COLORS.warning }]} />
-                <Text style={styles.legendText}>
-                  {mockResults.sentimentMix.neutral}% Neutral
-                </Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: COLORS.danger }]} />
-                <Text style={styles.legendText}>
-                  {mockResults.sentimentMix.negative}% Negative
-                </Text>
-              </View>
-            </View>
-          </View>
-        </StaggeredItem>
-
-        {/* Primary Gap */}
+        {/* Insights Grid */}
         <StaggeredItem index={5}>
-          <View style={[styles.card, { borderColor: COLORS.dangerMuted }]}>
-            <Text style={styles.gapLabel}>PRIMARY GAP DETECTED</Text>
-            <View style={styles.gapTitleRow}>
-              <AlertTriangle size={16} color={COLORS.warning} />
-              <Text style={styles.gapTitle}>{mockResults.primaryGap.title}</Text>
+          <View style={styles.insightsGrid}>
+            {/* Sentiment Mix */}
+            <View style={styles.insightCard}>
+              <Text style={styles.sectionLabel}>SENTIMENT MIX</Text>
+              <View style={styles.sentimentBar}>
+                <View
+                  style={[
+                    styles.sentimentSegment,
+                    {
+                      flex: mockResults.sentimentMix.positive,
+                      backgroundColor: DS.secondary,
+                      borderTopLeftRadius: 4,
+                      borderBottomLeftRadius: 4,
+                    },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.sentimentSegment,
+                    {
+                      flex: mockResults.sentimentMix.neutral,
+                      backgroundColor: DS.warning,
+                    },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.sentimentSegment,
+                    {
+                      flex: mockResults.sentimentMix.negative,
+                      backgroundColor: DS.tertiary,
+                      borderTopRightRadius: 4,
+                      borderBottomRightRadius: 4,
+                    },
+                  ]}
+                />
+              </View>
+              <View style={styles.sentimentLegend}>
+                <Text style={[styles.legendText, { color: DS.secondary }]}>
+                  {mockResults.sentimentMix.positive}% POS
+                </Text>
+                <Text style={[styles.legendText, { color: DS.warning }]}>
+                  {mockResults.sentimentMix.neutral}% NEU
+                </Text>
+                <Text style={[styles.legendText, { color: DS.tertiary }]}>
+                  {mockResults.sentimentMix.negative}% NEG
+                </Text>
+              </View>
             </View>
-            <Text style={styles.gapDescription}>{mockResults.primaryGap.description}</Text>
+
+            {/* Primary Gap */}
+            <View style={styles.insightCard}>
+              <Text style={styles.sectionLabel}>PRIMARY GAP</Text>
+              <Text style={styles.gapTitle}>{mockResults.primaryGap.title}</Text>
+              <Text style={styles.gapDescription} numberOfLines={3}>
+                {mockResults.primaryGap.description}
+              </Text>
+            </View>
           </View>
         </StaggeredItem>
 
         {/* Action Buttons */}
         <StaggeredItem index={6}>
           <View style={styles.actionsContainer}>
-            <AnimatedPressable onPress={handleViewGaps} style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>View Gap Analysis</Text>
+            <AnimatedPressable onPress={handleViewGaps}>
+              <LinearGradient
+                colors={[DS.gradientStart, DS.gradientEnd]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.primaryButton}
+              >
+                <Text style={styles.primaryButtonText}>View Gap Analysis</Text>
+              </LinearGradient>
             </AnimatedPressable>
             <AnimatedPressable onPress={handleExportPDF} style={styles.outlineButton}>
               <Text style={styles.outlineButtonText}>Export PDF</Text>
@@ -256,194 +250,265 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: DS.background,
   },
   header: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: DS.surfaceContainerLowest,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: DS.outlineVariant + '33',
   },
   headerBack: {
-    padding: 4,
-    width: 60,
+    width: 44,
+    height: 44,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
   },
-  headerTitle: {
+  headerBackIcon: {
+    fontSize: 22,
+    color: DS.primary,
+    fontWeight: '600',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerBrandText: {
     fontSize: 17,
     fontWeight: '700',
-    color: COLORS.text,
+    color: DS.primary,
     letterSpacing: -0.3,
   },
   headerRight: {
     fontSize: 13,
-    color: COLORS.primary,
-    fontWeight: '600',
-    width: 60,
+    color: DS.outline,
+    fontWeight: '500',
+    width: 44,
     textAlign: 'right',
   },
   scrollContent: {
-    padding: 20,
-    gap: 16,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
     padding: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: 10,
+    gap: 12,
   },
-  sectionLabel: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
+  groupLabel: {
+    fontSize: 10,
+    color: DS.outline,
     fontWeight: '600',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
-    textAlign: 'center',
+    paddingHorizontal: 4,
+    marginTop: 4,
+  },
+  scoreCard: {
+    backgroundColor: DS.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: DS.outlineVariant + '33',
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: DS.onSurface,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.04,
+    shadowRadius: 32,
+    elevation: 2,
+  },
+  sectionLabel: {
+    fontSize: 10,
+    color: DS.outline,
+    fontWeight: '600',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   scoreRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    justifyContent: 'center',
     gap: 4,
   },
   scoreNumber: {
-    fontSize: 72,
+    fontSize: 80,
     fontWeight: '700',
-    lineHeight: 80,
+    lineHeight: 88,
+    letterSpacing: -2,
   },
   scoreOutOf: {
-    fontSize: 24,
-    color: COLORS.textSecondary,
+    fontSize: 22,
+    color: DS.outlineVariant,
     fontWeight: '400',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   changeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: COLORS.accentMuted,
+    backgroundColor: DS.secondaryContainer + '40',
     borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    alignSelf: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  changeBadgeArrow: {
+    fontSize: 13,
+    color: DS.secondary,
+    fontWeight: '700',
   },
   changeBadgeText: {
-    fontSize: 13,
-    color: COLORS.accent,
-    fontWeight: '500',
+    fontSize: 11,
+    color: DS.onSecondaryContainer,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  engineCard: {
+    backgroundColor: DS.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: DS.outlineVariant + '33',
+    borderLeftWidth: 4,
+    shadowColor: DS.onSurface,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 1,
   },
   engineHeader: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  engineIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: DS.surfaceContainerLow,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+  },
+  engineIconText: {
+    fontSize: 20,
+  },
+  engineInfo: {
+    flex: 1,
+    gap: 6,
   },
   engineName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.text,
+    color: DS.onSurface,
   },
-  engineScore: {
-    fontSize: 28,
-    fontWeight: '700',
+  engineSnippet: {
+    fontSize: 13,
+    color: DS.onSurfaceVariant,
+    lineHeight: 19,
   },
   sentimentBadge: {
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     alignSelf: 'flex-start',
   },
   sentimentText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '700',
     letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
-  snippet: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 18,
+  engineScoreCol: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  engineScore: {
+    fontSize: 26,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  engineScoreLabel: {
+    fontSize: 10,
+    color: DS.outline,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  insightsGrid: {
+    gap: 12,
+  },
+  insightCard: {
+    backgroundColor: DS.surfaceContainerLow,
+    borderRadius: 12,
+    padding: 20,
+    gap: 10,
   },
   sentimentBar: {
     flexDirection: 'row',
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
+    backgroundColor: DS.surfaceContainerHigh,
   },
   sentimentSegment: {
     height: '100%',
   },
   sentimentLegend: {
     flexDirection: 'row',
-    gap: 16,
-    flexWrap: 'wrap',
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    justifyContent: 'space-between',
   },
   legendText: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-  gapLabel: {
-    fontSize: 11,
-    color: COLORS.danger,
-    fontWeight: '600',
-    letterSpacing: 1,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
-  gapTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   gapTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.text,
-    flex: 1,
+    color: DS.onSurface,
   },
   gapDescription: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 12,
+    color: DS.onSurfaceVariant,
     lineHeight: 18,
   },
   actionsContainer: {
     gap: 10,
+    marginTop: 4,
   },
   primaryButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
+    borderRadius: 10,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: DS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: DS.onPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   outlineButton: {
-    borderRadius: 12,
+    borderRadius: 10,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: DS.outlineVariant,
+    flexDirection: 'row',
+    gap: 8,
   },
   outlineButtonText: {
-    color: COLORS.textSecondary,
-    fontSize: 16,
-    fontWeight: '500',
+    color: DS.onSurface,
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   textButton: {
     height: 44,
@@ -451,8 +516,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textButtonText: {
-    color: COLORS.primary,
-    fontSize: 15,
+    color: DS.primary,
+    fontSize: 14,
     fontWeight: '500',
   },
 });

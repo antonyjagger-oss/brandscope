@@ -10,34 +10,15 @@ import {
   UIManager,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Radar } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { mockResults } from '@/constants/mockData';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DS } from '@/constants/Colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const COLORS = {
-  background: '#0A0E1A',
-  surface: '#111827',
-  surfaceSecondary: '#1C2333',
-  text: '#F0F4FF',
-  textSecondary: '#8B9CC8',
-  textTertiary: '#4A5578',
-  primary: '#4F8EF7',
-  primaryMuted: 'rgba(79,142,247,0.12)',
-  accent: '#34D399',
-  accentMuted: 'rgba(52,211,153,0.12)',
-  warning: '#FBBF24',
-  warningMuted: 'rgba(251,191,36,0.12)',
-  danger: '#F87171',
-  dangerMuted: 'rgba(248,113,113,0.12)',
-  border: 'rgba(79,142,247,0.12)',
-  divider: 'rgba(240,244,255,0.06)',
-};
 
 type GapItem = {
   id: string;
@@ -77,30 +58,26 @@ function StaggeredItem({ children, index }: { children: React.ReactNode; index: 
 
 function GapCard({ gap, type, index }: { gap: GapItem; type: 'critical' | 'warning'; index: number }) {
   const isCritical = type === 'critical';
-  const leftBorderColor = isCritical ? COLORS.danger : COLORS.warning;
-  const severityBg = isCritical ? COLORS.dangerMuted : COLORS.warningMuted;
-  const severityColor = isCritical ? COLORS.danger : COLORS.warning;
-  const severityLabel = isCritical ? 'CRITICAL' : 'WARNING';
+  const leftBorderColor = isCritical ? DS.critical : DS.warning;
+  const severityColor = isCritical ? DS.tertiary : DS.warning;
+  const severityLabel = isCritical ? 'Critical' : 'Warning';
   const scoreText = gap.score.toFixed(2);
 
   return (
     <StaggeredItem index={index}>
       <View style={[styles.gapCard, { borderLeftColor: leftBorderColor }]}>
         <View style={styles.gapBadgeRow}>
-          <View style={[styles.badge, { backgroundColor: severityBg }]}>
-            <Text style={[styles.badgeText, { color: severityColor }]}>{severityLabel}</Text>
-          </View>
-          <View style={[styles.badge, { backgroundColor: COLORS.primaryMuted }]}>
-            <Text style={[styles.badgeText, { color: COLORS.primary }]}>{gap.engine}</Text>
+          <Text style={[styles.severityLabel, { color: severityColor }]}>{severityLabel}</Text>
+          <View style={styles.engineBadge}>
+            <Text style={styles.engineBadgeText}>{gap.engine}</Text>
           </View>
         </View>
         <Text style={styles.gapTitle}>{gap.title}</Text>
         <Text style={styles.gapDescription}>{gap.description}</Text>
         <View style={styles.gapFooter}>
-          <Text style={styles.gapId}>{gap.id}</Text>
-          <Text style={[styles.gapScore, { color: severityColor }]}>
-            {scoreText}
-          </Text>
+          <Text style={styles.gapId}>ID: {gap.id}</Text>
+          <Text style={styles.gapSep}>•</Text>
+          <Text style={styles.gapScore}>Score: {scoreText}</Text>
         </View>
       </View>
     </StaggeredItem>
@@ -142,66 +119,60 @@ export default function GapsScreen() {
 
   const criticalCount = mockResults.gaps.critical.length;
   const warningsCount = mockResults.gaps.warnings.length;
-  const criticalLabel = `Critical (${criticalCount})`;
-  const warningsLabel = `Warnings (${warningsCount})`;
 
   const activeGaps =
     activeTab === 'critical' ? mockResults.gaps.critical : mockResults.gaps.warnings;
   const activeType = activeTab === 'critical' ? 'critical' : 'warning';
 
-  const copyButtonText = copied ? 'Copied! ✓' : 'Copy AI Correction Prompt';
-  const copyButtonColor = copied ? COLORS.accent : '#FFFFFF';
+  const copyButtonText = copied ? 'Copied!' : 'Copy AI Correction Prompt';
+
+  const isCriticalTab = activeTab === 'critical';
+  const isWarningsTab = activeTab === 'warnings';
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
         <AnimatedPressable onPress={handleBack} style={styles.headerBack}>
-          <ChevronLeft size={24} color={COLORS.textSecondary} />
+          <Text style={styles.headerBackIcon}>←</Text>
         </AnimatedPressable>
         <Text style={styles.headerTitle}>Gap Analysis</Text>
         <AnimatedPressable onPress={handleHome} style={styles.headerRight}>
-          <Radar size={20} color={COLORS.primary} />
+          <Text style={styles.headerRightIcon}>⬡</Text>
         </AnimatedPressable>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Tab Switcher */}
         <View style={styles.tabContainer}>
           <AnimatedPressable
             onPress={() => handleTabSwitch('critical')}
-            style={[
-              styles.tab,
-              activeTab === 'critical' && styles.tabActive,
-            ]}
+            style={[styles.tab, isCriticalTab && styles.tabActive]}
           >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'critical' && styles.tabTextActive,
-              ]}
-            >
-              {criticalLabel}
+            <Text style={[styles.tabText, isCriticalTab && styles.tabTextActive]}>
+              Critical
             </Text>
+            <View style={[styles.tabCount, isCriticalTab && styles.tabCountActive]}>
+              <Text style={[styles.tabCountText, isCriticalTab && styles.tabCountTextActive]}>
+                {criticalCount}
+              </Text>
+            </View>
           </AnimatedPressable>
           <AnimatedPressable
             onPress={() => handleTabSwitch('warnings')}
-            style={[
-              styles.tab,
-              activeTab === 'warnings' && styles.tabActive,
-            ]}
+            style={[styles.tab, isWarningsTab && styles.tabActive]}
           >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'warnings' && styles.tabTextActive,
-              ]}
-            >
-              {warningsLabel}
+            <Text style={[styles.tabText, isWarningsTab && styles.tabTextActive]}>
+              Warnings
             </Text>
+            <View style={[styles.tabCount, isWarningsTab && styles.tabCountActive]}>
+              <Text style={[styles.tabCountText, isWarningsTab && styles.tabCountTextActive]}>
+                {warningsCount}
+              </Text>
+            </View>
           </AnimatedPressable>
         </View>
 
@@ -211,24 +182,22 @@ export default function GapsScreen() {
             <GapCard key={gap.id} gap={gap} type={activeType as 'critical' | 'warning'} index={i} />
           ))}
         </View>
+      </ScrollView>
 
-        {/* Copy Prompt Button */}
+      {/* Sticky Bottom CTA */}
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
+        <Text style={styles.bottomBarHint}>
+          Optimize analysis with refined AI parameters
+        </Text>
         <AnimatedPressable
           onPress={handleCopyPrompt}
-          style={[styles.copyButton, copied && { backgroundColor: COLORS.accentMuted }]}
+          style={[styles.copyButton, copied && styles.copyButtonCopied]}
         >
-          <Text style={[styles.copyButtonText, { color: copyButtonColor }]}>
+          <Text style={[styles.copyButtonText, copied && styles.copyButtonTextCopied]}>
             {copyButtonText}
           </Text>
         </AnimatedPressable>
-
-        {/* Info Note */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoText}>
-            Optimize your AI presence by addressing critical gaps first. Share the correction prompt with your content team.
-          </Text>
-        </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -236,137 +205,210 @@ export default function GapsScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: DS.background,
   },
   header: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: DS.surfaceContainerLowest,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: DS.outlineVariant + '33',
   },
   headerBack: {
-    padding: 4,
     width: 44,
+    height: 44,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  headerBackIcon: {
+    fontSize: 22,
+    color: DS.primary,
+    fontWeight: '600',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.text,
+    color: DS.primary,
+    letterSpacing: -0.3,
   },
   headerRight: {
-    padding: 4,
     width: 44,
+    height: 44,
     alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  headerRightIcon: {
+    fontSize: 20,
+    color: DS.primary,
+    fontWeight: '700',
   },
   scrollContent: {
-    padding: 20,
+    padding: 16,
     gap: 16,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: COLORS.surfaceSecondary,
-    borderRadius: 12,
-    padding: 4,
-    gap: 4,
+    gap: 8,
+    height: 48,
   },
   tab: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 10,
+    backgroundColor: DS.surfaceContainer,
   },
   tabActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: DS.primary,
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: COLORS.textSecondary,
+    fontWeight: '600',
+    color: DS.outline,
   },
   tabTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: DS.onPrimary,
+  },
+  tabCount: {
+    backgroundColor: DS.surfaceContainerHigh,
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  tabCountActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  tabCountText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: DS.outline,
+  },
+  tabCountTextActive: {
+    color: DS.onPrimary,
   },
   gapsList: {
     gap: 12,
   },
   gapCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    backgroundColor: DS.surfaceContainerLowest,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderLeftWidth: 3,
-    gap: 10,
+    borderColor: DS.outlineVariant + '33',
+    borderLeftWidth: 4,
+    gap: 8,
+    shadowColor: DS.onSurface,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 1,
   },
   gapBadgeRow: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  badge: {
-    borderRadius: 6,
+  severityLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  engineBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: DS.surfaceContainerLow,
+    borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: DS.outlineVariant + '33',
   },
-  badgeText: {
-    fontSize: 11,
+  engineBadgeText: {
+    fontSize: 10,
     fontWeight: '600',
+    color: DS.onSurfaceVariant,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   gapTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.text,
+    color: DS.onSurface,
+    lineHeight: 21,
   },
   gapDescription: {
     fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 18,
+    color: DS.onSurfaceVariant,
+    lineHeight: 19,
   },
   gapFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 6,
     marginTop: 2,
   },
   gapId: {
-    fontSize: 12,
-    color: COLORS.textTertiary,
-    fontVariant: ['tabular-nums'],
+    fontSize: 11,
+    color: DS.outlineVariant,
+    fontWeight: '500',
+    letterSpacing: 0.3,
+  },
+  gapSep: {
+    fontSize: 11,
+    color: DS.outlineVariant,
   },
   gapScore: {
-    fontSize: 12,
-    fontVariant: ['tabular-nums'],
+    fontSize: 11,
+    color: DS.outlineVariant,
+    fontWeight: '500',
+    letterSpacing: 0.3,
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: DS.surfaceContainerLowest + 'F0',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: DS.outlineVariant + '33',
+    gap: 10,
+  },
+  bottomBarHint: {
+    fontSize: 10,
+    color: DS.outline,
+    textAlign: 'center',
+    letterSpacing: 1.2,
     fontWeight: '600',
+    textTransform: 'uppercase',
   },
   copyButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
     height: 52,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: DS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  copyButtonCopied: {
+    borderColor: DS.secondary,
+    backgroundColor: DS.secondaryContainer + '20',
+  },
   copyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
+    color: DS.primary,
+    letterSpacing: 0.3,
   },
-  infoCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  infoText: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-    textAlign: 'center',
+  copyButtonTextCopied: {
+    color: DS.secondary,
   },
 });
