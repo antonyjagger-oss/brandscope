@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   Animated,
+  Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
@@ -104,10 +105,7 @@ export default function AnalysisScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerBrand}>
-          <View style={styles.headerIcon}>
-            <Text style={styles.headerIconText}>⬡</Text>
-          </View>
-          <Text style={styles.headerBrandText}>BrandScope</Text>
+          <Image source={require('../brandscope.png')} style={{ width: 160, height: 40 }} resizeMode="contain" />
         </View>
         <Text style={styles.modeLabel}>ANALYSIS MODE</Text>
       </View>

@@ -7,6 +7,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -125,7 +126,7 @@ export default function PricingScreen() {
         <AnimatedPressable onPress={handleBack} style={styles.headerBack}>
           <Text style={styles.headerBackIcon}>←</Text>
         </AnimatedPressable>
-        <Text style={styles.headerTitle}>Pricing</Text>
+        <Image source={require('../brandscope.png')} style={{ width: 160, height: 40 }} resizeMode="contain" />
         <View style={styles.headerSpacer} />
       </View>
 

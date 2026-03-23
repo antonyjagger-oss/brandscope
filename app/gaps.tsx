@@ -8,6 +8,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
@@ -136,7 +137,7 @@ export default function GapsScreen() {
         <AnimatedPressable onPress={handleBack} style={styles.headerBack}>
           <Text style={styles.headerBackIcon}>←</Text>
         </AnimatedPressable>
-        <Text style={styles.headerTitle}>Gap Analysis</Text>
+        <Image source={require('../brandscope.png')} style={{ width: 160, height: 40 }} resizeMode="contain" />
         <AnimatedPressable onPress={handleHome} style={styles.headerRight}>
           <Text style={styles.headerRightIcon}>⬡</Text>
         </AnimatedPressable>
