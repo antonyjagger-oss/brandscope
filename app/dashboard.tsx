@@ -6,6 +6,7 @@ import {
   ScrollView,
   Animated,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -88,7 +89,11 @@ export default function DashboardScreen() {
           <Text style={styles.headerBackIcon}>←</Text>
         </AnimatedPressable>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerBrandText}>BrandScope</Text>
+          <Image
+            source={require('../brandscope_logo.png')}
+            style={styles.headerLogo}
+            resizeMode="contain"
+          />
         </View>
         <Text style={styles.headerRight}>Results</Text>
       </View>
@@ -277,11 +282,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  headerBrandText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: DS.primary,
-    letterSpacing: -0.3,
+  headerLogo: {
+    width: 160,
+    height: 40,
   },
   headerRight: {
     fontSize: 13,

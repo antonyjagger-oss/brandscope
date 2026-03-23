@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -59,12 +60,11 @@ export default function StartScreen() {
     >
       {/* Top header bar */}
       <View style={styles.header}>
-        <View style={styles.headerBrand}>
-          <View style={styles.headerIcon}>
-            <Text style={styles.headerIconText}>⬡</Text>
-          </View>
-          <Text style={styles.headerBrandText}>BrandScope</Text>
-        </View>
+        <Image
+          source={require('../brandscope_logo.png')}
+          style={styles.headerLogo}
+          resizeMode="contain"
+        />
         <Text style={styles.headerMode}>AI Visibility</Text>
       </View>
 
@@ -172,29 +172,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: DS.outlineVariant + '33',
   },
-  headerBrand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: DS.primaryFixed,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerIconText: {
-    fontSize: 14,
-    color: DS.primary,
-    fontWeight: '700',
-  },
-  headerBrandText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: DS.primary,
-    letterSpacing: -0.3,
+  headerLogo: {
+    width: 160,
+    height: 40,
   },
   headerMode: {
     fontSize: 13,
