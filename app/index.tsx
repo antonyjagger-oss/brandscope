@@ -61,7 +61,7 @@ export default function StartScreen() {
       {/* Top header bar */}
       <View style={styles.header}>
         <Image
-          source={require('../brandscope_logo.png')}
+          source={require('../assets/images/brandscope.png')}
           style={styles.headerLogo}
           resizeMode="contain"
         />

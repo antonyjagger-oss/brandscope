@@ -90,7 +90,7 @@ export default function DashboardScreen() {
         </AnimatedPressable>
         <View style={styles.headerCenter}>
           <Image
-            source={require('../brandscope_logo.png')}
+            source={require('../assets/images/brandscope.png')}
             style={styles.headerLogo}
             resizeMode="contain"
           />
