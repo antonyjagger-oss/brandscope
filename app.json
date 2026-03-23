@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "so-i-have-an-app-in-",
-    "slug": "so-i-have-an-app-in",
+    "name": "BrandScope",
+    "slug": "brandscope",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Sk\u00e4rmbild 2026-03-23 221630.png",
@@ -35,7 +35,7 @@
       "expo-web-browser",
       "expo-secure-store"
     ],
-    "scheme": "soihaveanappin",
+    "scheme": "brandscope",
     "experiments": {
       "typedRoutes": true
     },
